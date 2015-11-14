@@ -1,5 +1,7 @@
 # Barebone application written in Scala.js using d3 facade
 
+![](https://github.com/spaced/scala-js-d3/blob/master/site/d3demo.png)
+
 This is a barebone example of an application written in
 [Scala.js](https://www.scala-js.org/) using d3 scala js facade.
 
