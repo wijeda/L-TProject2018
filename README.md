@@ -19,9 +19,9 @@ changes.
 
 ## Other examples
 Available as branches:
-- [scatterchart](tree/scatterchart)
-- [histogram](tree/histogram)
-- [table data](tree/table_data_example)
+- [scatterchart](https://github.com/spaced/scala-js-d3-example-app/tree/scatterchart)
+- [histogram](https://github.com/spaced/scala-js-d3-example-app/tree/histogram)
+- [table data](https://github.com/spaced/scala-js-d3-example-app/tree/table_data_example)
 
 ## The fully optimized version
 
