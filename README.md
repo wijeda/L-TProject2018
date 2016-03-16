@@ -17,6 +17,12 @@ time you save a source file, a compilation of the project is triggered.
 Hence only a refresh of your Web page is needed to see the effects of your
 changes.
 
+## Other examples
+Available as branches:
+- [scatterchart](tree/scatterchart)
+- [histogram](tree/histogram)
+- [table data](tree/table_data_example)
+
 ## The fully optimized version
 
 For ultimate code size reduction, use `fullOptJS`. This will take several
