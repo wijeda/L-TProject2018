@@ -15,7 +15,7 @@ testFrameworks += new TestFramework("utest.runner.Framework")
 
 libraryDependencies ++= Seq(
     "org.scala-js" %%% "scalajs-dom" % "0.9.0",
-    "org.singlespaced" %%% "scalajs-d3" % "0.3.1",
+    "org.singlespaced" %%% "scalajs-d3" % "0.3.2",
     "com.lihaoyi" %%% "utest" % "0.4.3" % "test"
 )
 
