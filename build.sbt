@@ -19,4 +19,5 @@ libraryDependencies ++= Seq(
     "com.lihaoyi" %%% "utest" % "0.4.3" % "test"
 )
 
-
+// use phantomjs for tests because d3 lib uses features not supported by rhino
+scalaJSUseRhino in Global := false
