@@ -1,23 +1,36 @@
 // Turn this project into a Scala.js project by importing these settings
 enablePlugins(ScalaJSPlugin)
+enablePlugins(ScalaJSBundlerPlugin)
 
 name := "Example"
 
 version := "0.1-SNAPSHOT"
 
-scalaVersion := "2.11.8"
-
-persistLauncher in Compile := true
-
-persistLauncher in Test := false
-
-testFrameworks += new TestFramework("utest.runner.Framework")
+scalaVersion := "2.12.6"
 
 libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.9.0",
-    "org.singlespaced" %%% "scalajs-d3" % "0.3.3",
-    "com.lihaoyi" %%% "utest" % "0.4.3" % "test"
+    "org.scala-js" %%% "scalajs-dom" % "0.9.2"
 )
 
-// use phantomjs for tests because d3 lib uses features not supported by rhino
-scalaJSUseRhino in Global := false
+scalaJSUseMainModuleInitializer := true
+mainClass := Some("example.ScalaJSExample")
+
+
+npmDependencies in Compile ++= (
+  "d3" -> "4.12.2" ::
+    Nil
+  )
+
+useYarn := true
+
+scalacOptions ++=
+  "-encoding" :: "UTF-8" ::
+    "-unchecked" ::
+    "-deprecation" ::
+    "-explaintypes" ::
+    "-feature" ::
+    "-language:_" ::
+    // "-Xlint:_" ::
+    // "-Ywarn-unused" ::
+    "-P:scalajs:sjsDefinedByDefault" ::
+    Nil
