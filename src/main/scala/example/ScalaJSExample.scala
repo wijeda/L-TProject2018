@@ -17,12 +17,15 @@ object ScalaJSExample {
 
   @JSExport
   def main(args: Array[String]): Unit = {
+    /*
     val matrix = js.Array[js.Array[Double]](
       js.Array(11975,  5871, 8916, 2868),
       js.Array(1951, 10048, 2060, 6171),
       js.Array(8010, 16145, 8090, 8045),
       js.Array(1013,   990,  940, 6907)
     )
+
+
 
     import d3v4.d3
     val svg = d3.select("svg")
@@ -42,6 +45,7 @@ object ScalaJSExample {
     val color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(js.Array("#000000", "#FFDD89", "#957244", "#F26223"))
 
     val g: Selection[ChordArray] = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")").datum(chord(matrix))
+
 
     val group = g.append("g").attr("class", "groups")
       .selectAll("g")
@@ -70,5 +74,22 @@ object ScalaJSExample {
       .attr("d", (d: Chord) => ribbon(d))
       .style("fill", (d: Chord) => color(d.target.index))
       .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
+  //}
+    */
+    import d3v4.myDSLchordgroup
+
+    val matrix2 = js.Array[js.Array[Double]](
+      js.Array(11975, 5871, 8916, 2868),
+      js.Array(1951, 10048, 2060, 6171),
+      js.Array(8010, 16145, 8090, 8045),
+      js.Array(1013, 990, 940, 6907)
+    )
+
+    val test = new myDSLchordgroup(matrix2, 0.05)
+    test.defcolors(js.Array("#000888", "#FFD111", "#957222", "#FFFFFF"))
+    test.printmeth()
+
+    test.printgraph()
   }
+
 }
