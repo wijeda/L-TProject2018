@@ -5,9 +5,24 @@ import example.ScalaJSExample.groupTicks
 import scalajs.js
 import scalajs.js.{`|`, undefined}
 import scala.scalajs.js.annotation._
+import scala.io.Source
 
 
 class myDSLchordgroup(matrix : js.Array[js.Array[Double]], padAngle : Double){
+
+  def isSquaredMatrix(matrix : js.Array[js.Array[Double]]): Unit ={
+    val numberRow = matrix.length
+
+    for(a <- 0 to numberRow-1){
+      if(matrix(a).length != numberRow){
+        println("matrix not square")
+        throw new IllegalArgumentException
+      }
+    }
+  }
+
+  isSquaredMatrix(matrix)
+
   def printmeth() {
     println(matrix)
   }
@@ -26,7 +41,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]], padAngle : Double){
 
     val select = d3.select("svg")
       //.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ") scale(" + zoomLevel + ") translate(" + mouse(0) + ", " + mouse(1) + ")")
-      .attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ") scale(" + zoomLevel + ") translate(-" + mouse(0) + ", -" + mouse(1) + ")")
+      //.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ") scale(" + zoomLevel + ") translate(-" + mouse(0) + ", -" + mouse(1) + ")")
         //.transition()
         //.duration()
   }
@@ -48,18 +63,17 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]], padAngle : Double){
   var color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(js.Array("#000000", "#FFDD89", "#957244", "#F26223"))
 
 
-
-
-
   val g: Selection[ChordArray] = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")").datum(chord(matrix))
 
   g.on("click", mousewheeled)
 
+
   def printgraph(): Unit ={
+
+
 
     colors match {
       case Some(c) => color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(c)
-        println("lol")
       case None => color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(js.Array("#000000", "#FFDD89", "#957244", "#F26223"))
     }
 
@@ -68,13 +82,56 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]], padAngle : Double){
       .data((c: ChordArray) => c.groups)
       .enter().append("g")
 
+
+
+      //.on("click", giveinfo(_))
+
     group.append("path").style("fill", (d: ChordGroup) => color(d.index))
       .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
       .attr("d", (x: ChordGroup) => arc(x))
+      .attr("id",(d:ChordGroup) => "chordgroup" + d.index)
+      .attr("color", (d: ChordGroup) => d3.rgb(color(d.index)))
+      .attr("selected", "false")
+      .on("click", (d:ChordGroup) => {
+        println(d)
+        val sel = d3selection.select("#chordgroup"+ d.index).attr("selected")
+        if(sel == "false"){
+          for(a <- 0 to matrix.length-1){
+            val currentSel = d3selection.select("#chordgroup"+ a).attr("selected")
+            if(currentSel == "true")
+              {
+                println(matrix(d.index))
+                println(d.index)
+                println(a)
+                println(matrix(a))
+                val newLine = new Array[Double](matrix.length)
+                for(i <- 0 to matrix.length-1){
+                  newLine(i) = matrix(a)(i) + matrix(d.index)(i)
+                  println(newLine(i))
+                }
+              }
+          }
+          val mygroup = d3selection.select("#chordgroup"+ d.index)
+            .attr("style", "fill : rgb(0,0,0)")
+            .attr("selected", "true")
+        }
+        else if(sel == "true"){
+          val color = d3selection.select("#chordgroup"+ d.index).attr("color")
+
+          val mygroup = d3selection.select("#chordgroup"+ d.index)
+            .attr("style", "fill : "+color)
+            .attr("selected", "false")
+        }
+        val color = d3selection.select("#chordgroup"+ d.index).attr("color")
+      })
+
+
+
 
     var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, 1e3))
       .enter().append("g").attr("class", "group-tick")
       .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
+
 
     groupTick.append("line").attr("x2", 6)
 

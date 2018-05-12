@@ -79,10 +79,9 @@ object ScalaJSExample {
     import d3v4.myDSLchordgroup
 
     val matrix2 = js.Array[js.Array[Double]](
-      js.Array(11975, 5871, 8916, 2868),
-      js.Array(1951, 10048, 2060, 6171),
-      js.Array(8010, 16145, 8090, 8045),
-      js.Array(1013, 990, 940, 6907)
+      js.Array(1,2,3),
+      js.Array(4,5,6),
+      js.Array(7,8,9)
     )
 
     val test = new myDSLchordgroup(matrix2, 0.05)
