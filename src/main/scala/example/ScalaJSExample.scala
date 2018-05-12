@@ -89,8 +89,7 @@ object ScalaJSExample {
     )
     ()
     val test = new myDSLchordgroup(matrix2, 0.05)
-    test.defcolors(js.Array("#000888", "#FFD111", "#957222", "#FFFFFF"))
-    test.printmeth()
+    test.defcolors(js.Array("#FDA123", "#BBCADF", "#14BFA1", "#ABABAB"))
 
     test.printgraph()
   }

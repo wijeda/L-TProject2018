@@ -22,10 +22,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]], padAngle : Double){
   }
 
   isSquaredMatrix(matrix)
-
-  def printmeth() {
-    println(matrix)
-  }
+  
   var colors : Option[js.Array[String]] = None
 
   def defcolors(listofcolors : js.Array[String]): Unit =
@@ -67,6 +64,87 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]], padAngle : Double){
 
   g.on("click", mousewheeled)
 
+  //when called, merge the d-th chordgroup of the chord diagram with the a-th
+  def merge(index2 : Int, d : ChordGroup) : Unit ={
+
+    val newMatrix = new js.Array[js.Array[Double]](matrix.length-1)
+    for(j <- 0 to newMatrix.length -1){
+      newMatrix(j) = new js.Array[Double](matrix.length-1)
+    }
+
+    //calculates the new line merging the ones from the merged entries
+    val newLine = new Array[Double](matrix.length)
+    for(i <- 0 to matrix.length-1){
+      newLine(i) = matrix(index2)(i) + matrix(d.index)(i)
+    }
+    val newColumn = new Array[Double](matrix.length)
+    var newIndex = 0
+    var deletedIndex = 0
+    //we take the smallest index between the two merged, it will be the
+    if(d.index<index2){
+      newIndex = d.index
+      deletedIndex = index2
+    }
+    else{
+      newIndex = index2
+      deletedIndex = d.index
+    }
+
+    //calculates the new column merging the ones from the merged entries
+    for(i <- 0 to matrix.length-1){
+      if(i == newIndex)
+      {
+        newColumn(i) = newLine(index2) + newLine(d.index)
+      }
+      else if(i != deletedIndex)
+      {
+        newColumn(i) = matrix(i)(index2) + matrix(i)(d.index)
+      }
+    }
+    //fill the new matrix
+    for(abs <- 0 to matrix.length-2){
+      for(ord <- 0 to matrix.length-2){
+        if(abs == newIndex){
+          if(ord >= deletedIndex){
+            newMatrix(abs)(ord)= newLine(ord+1)
+          }
+          else if(ord == newIndex) {
+            newMatrix(abs)(ord) = newColumn(ord)
+          }
+          else{
+            newMatrix(abs)(ord)= newLine(ord)
+          }
+
+        }
+        else if(ord == newIndex){
+          if(abs >= deletedIndex){
+            newMatrix(abs)(ord) = newColumn(abs+1)
+          }
+          else{
+            newMatrix(abs)(ord) = newColumn(abs)
+          }
+        }
+        else{
+          if(abs >= deletedIndex){
+            newMatrix(abs)(ord) = matrix(abs+1)(ord+1)
+          }
+          else{
+            newMatrix(abs)(ord) = matrix(abs)(ord)
+          }
+        }
+      }
+    }
+    d3selection.select("g").remove()
+    val newplot = new myDSLchordgroup(newMatrix, 0.05)
+    colors match {
+      case Some(c) => newplot.defcolors(c)
+      case None => defcolors(js.Array("#000000", "#FFDD89", "#957244", "#F26223"))
+    }
+
+    newplot.printgraph()
+
+  }
+
 
   def printgraph(): Unit ={
 
@@ -95,83 +173,11 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]], padAngle : Double){
       .on("click", (d:ChordGroup) => {
         val sel = d3selection.select("#chordgroup"+ d.index).attr("selected")
         if(sel == "false"){
-          for(a <- 0 to matrix.length-1){
-            val currentSel = d3selection.select("#chordgroup"+ a).attr("selected")
+          for(index2 <- 0 to matrix.length-1){
+            val currentSel = d3selection.select("#chordgroup"+ index2).attr("selected")
             if(currentSel == "true")
               {
-                var newMatrix = new js.Array[js.Array[Double]](matrix.length-1)
-                for(j <- 0 to newMatrix.length -1){
-                  newMatrix(j) = new js.Array[Double](matrix.length-1)
-                }
-                val newLine = new Array[Double](matrix.length)
-                for(i <- 0 to matrix.length-1){
-                  newLine(i) = matrix(a)(i) + matrix(d.index)(i)
-                }
-                val newColumn = new Array[Double](matrix.length)
-                var newIndex = 0
-                var deletedIndex = 0
-                if(d.index<a)
-                {
-                  newIndex = d.index
-                  deletedIndex = a
-                }
-                else
-                {
-                  newIndex = a
-                  deletedIndex = d.index
-                }
-
-                println(matrix)
-
-                for(i <- 0 to matrix.length-1){
-                  if(i == newIndex)
-                  {
-                    newColumn(i) = newLine(a) + newLine(d.index)
-                  }
-                  else if(i != deletedIndex)
-                  {
-                    newColumn(i) = matrix(i)(a) + matrix(i)(d.index)
-                  }
-
-                }
-                for(abs <- 0 to matrix.length-2){
-                  for(ord <- 0 to matrix.length -2){
-                    if(abs == newIndex){
-                      if(ord >= deletedIndex){
-                        newMatrix(abs)(ord)= newLine(ord+1)
-                      }
-                      else if(ord == newIndex) {
-                        newMatrix(abs)(ord) = newColumn(ord)
-                      }
-                      else{
-                        newMatrix(abs)(ord)= newLine(ord)
-                      }
-
-                    }
-                    else if(ord == newIndex){
-                      if(abs >= deletedIndex){
-                        newMatrix(abs)(ord) = newColumn(abs+1)
-                      }
-                      else{
-                        newMatrix(abs)(ord) = newColumn(abs)
-                      }
-                    }
-                    else{
-                      if(abs >= deletedIndex){
-                        newMatrix(abs)(ord) = matrix(abs+1)(ord+1)
-                      }
-                      else{
-                        newMatrix(abs)(ord) = matrix(abs)(ord)
-                      }
-                    }
-                  }
-                }
-                d3selection.select("g").remove()
-                println(newMatrix)
-                val newplot = new myDSLchordgroup(newMatrix, 0.05)
-                newplot.defcolors(js.Array("#000888", "#FFD111", "#957222", "#FFFFFF"))
-
-                newplot.printgraph()
+                merge(index2, d)
               }
 
           }
