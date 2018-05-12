@@ -75,15 +75,19 @@ object ScalaJSExample {
       .style("fill", (d: Chord) => color(d.target.index))
       .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
   //}
+  js.Array(1,2,3),
+      js.Array(4,5,6),
+      js.Array(7,8,9)
     */
     import d3v4.myDSLchordgroup
 
     val matrix2 = js.Array[js.Array[Double]](
-      js.Array(1,2,3),
-      js.Array(4,5,6),
-      js.Array(7,8,9)
+      js.Array(1,2,3,4),
+      js.Array(5,6,7,8),
+      js.Array(9,10,11,12),
+      js.Array(13,14,15,16)
     )
-
+    ()
     val test = new myDSLchordgroup(matrix2, 0.05)
     test.defcolors(js.Array("#000888", "#FFD111", "#957222", "#FFFFFF"))
     test.printmeth()
