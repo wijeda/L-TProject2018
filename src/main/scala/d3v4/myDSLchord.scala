@@ -150,13 +150,23 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
       .on("mouseover", (d: ChordGroup) => {
         /*d3selection.select("#ribbonID"+d.source.index+d.target.index)
           .style("opacity", "0.2")*/
+        for(i <- 0 until matrix.length){
+          d3selection.select("#chordgroup"+i)
+            .style("opacity", "0.2")
+          for(j <- 0 until matrix.length) {
+            d3selection.select("#ribbonID" + j + i)
+              .style("opacity", "0.2")
+            d3selection.select("#ribbonID" + i + j)
+              .style("opacity", "0.2")
+          }
+        }
         d3selection.select("#chordgroup"+d.index)
-          .style("opacity", "0.2")
+          .style("opacity", "1.0")
         for(i <- 0 until matrix.length){
           d3selection.select("#ribbonID"+d.index+i)
-            .style("opacity", "0.2")
+            .style("opacity", "1.0")
           d3selection.select("#ribbonID"+i+d.index)
-            .style("opacity", "0.2")
+            .style("opacity", "1.0")
         }
         if(false){
           return
@@ -165,13 +175,15 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
       .on("mouseout", (d: ChordGroup) => {
         /*d3selection.select("#ribbonID"+d.source.index+d.target.index)
           .style("opacity", "1.0")*/
-        d3selection.select("#chordgroup"+d.index)
-          .style("opacity", "1.0")
         for(i <- 0 until matrix.length){
-          d3selection.select("#ribbonID"+d.index+i)
+          d3selection.select("#chordgroup"+i)
             .style("opacity", "1.0")
-          d3selection.select("#ribbonID"+i+d.index)
-            .style("opacity", "1.0")
+          for(j <- 0 until matrix.length) {
+            d3selection.select("#ribbonID" + j + i)
+              .style("opacity", "1.0")
+            d3selection.select("#ribbonID" + i + j)
+              .style("opacity", "1.0")
+          }
         }
         if(false){
           return
@@ -199,15 +211,25 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
       .style("fill", (d: Chord) => color(d.target.index))
       .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
       .on("mouseover", (d: Chord) => {
+        for(i <- 0 until matrix.length; j <- 0 until matrix.length){
+          d3selection.select("#ribbonID"+j+i)
+            .style("opacity", "0.2")
+          d3selection.select("#ribbonID"+i+j)
+            .style("opacity", "0.2")
+        }
         d3selection.select("#ribbonID"+d.source.index+d.target.index)
-          .style("opacity", "0.2")
+          .style("opacity", "1.0")
         if(false){
           return
         }
       })
       .on("mouseout", (d: Chord) => {
-        d3selection.select("#ribbonID"+d.source.index+d.target.index)
-          .style("opacity", "1.0")
+        for(i <- 0 until matrix.length; j <- 0 until matrix.length){
+          d3selection.select("#ribbonID"+j+i)
+            .style("opacity", "1.0")
+          d3selection.select("#ribbonID"+i+j)
+            .style("opacity", "1.0")
+        }
         if(false){
           return
         }
