@@ -147,6 +147,36 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
         }
         //val color = d3selection.select("#chordgroup"+ d.index).attr("color")
       })
+      .on("mouseover", (d: ChordGroup) => {
+        /*d3selection.select("#ribbonID"+d.source.index+d.target.index)
+          .style("opacity", "0.2")*/
+        d3selection.select("#chordgroup"+d.index)
+          .style("opacity", "0.2")
+        for(i <- 0 until matrix.length){
+          d3selection.select("#ribbonID"+d.index+i)
+            .style("opacity", "0.2")
+          d3selection.select("#ribbonID"+i+d.index)
+            .style("opacity", "0.2")
+        }
+        if(false){
+          return
+        }
+      })
+      .on("mouseout", (d: ChordGroup) => {
+        /*d3selection.select("#ribbonID"+d.source.index+d.target.index)
+          .style("opacity", "1.0")*/
+        d3selection.select("#chordgroup"+d.index)
+          .style("opacity", "1.0")
+        for(i <- 0 until matrix.length){
+          d3selection.select("#ribbonID"+d.index+i)
+            .style("opacity", "1.0")
+          d3selection.select("#ribbonID"+i+d.index)
+            .style("opacity", "1.0")
+        }
+        if(false){
+          return
+        }
+      })
 
     var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, 1e3))
       .enter().append("g").attr("class", "group-tick")
@@ -165,8 +195,23 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
     g.append("g").attr("class", "ribbons").selectAll("path").data((c: ChordArray) => c)
       .enter().append("path")
       .attr("d", (d: Chord) => ribbon(d))
+      .attr("id",(d:Chord) => "ribbonID" + d.source.index+d.target.index)
       .style("fill", (d: Chord) => color(d.target.index))
       .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
+      .on("mouseover", (d: Chord) => {
+        d3selection.select("#ribbonID"+d.source.index+d.target.index)
+          .style("opacity", "0.2")
+        if(false){
+          return
+        }
+      })
+      .on("mouseout", (d: Chord) => {
+        d3selection.select("#ribbonID"+d.source.index+d.target.index)
+          .style("opacity", "1.0")
+        if(false){
+          return
+        }
+      })
 
   }
 
