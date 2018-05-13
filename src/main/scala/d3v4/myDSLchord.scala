@@ -8,62 +8,59 @@ import scalajs.js.{`|`, undefined}
 import scala.scalajs.js.annotation._
 import scala.io.Source
 
+class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
 
-class myDSLchordgroup(matrix : js.Array[js.Array[Double]], padAngle : Double){
+  val numberRow = matrix.length
 
-  def isSquaredMatrix(matrix : js.Array[js.Array[Double]]): Unit ={
-    val numberRow = matrix.length
-
-    for(a <- 0 to numberRow-1){
-      if(matrix(a).length != numberRow){
-        println("matrix not square")
-        throw new IllegalArgumentException
-      }
+  for(a <- 0 to numberRow-1){
+    if(matrix(a).length != numberRow){
+      println("matrix not square")
+      throw new IllegalArgumentException
     }
   }
 
-  isSquaredMatrix(matrix)
+  // Random generator
+  val random = new scala.util.Random
+  // Generate a random string of length n from the given alphabet
+  def randomString(alphabet: String)(n: Int): String =
+    Stream.continually(random.nextInt(alphabet.size)).map(alphabet).take(n).mkString
+  // Generate a random alphabnumeric string of length n
+  def randomAlphanumericString(n: Int) =
+    randomString("ABCDEF0123456789")(n)
 
+  val svg = d3.select("svg")
+  var width = svg.attr("width").toDouble
+  var height = svg.attr("height").toDouble
+  var outerRadius = Math.min(width, height) * 0.5 - 40
+  var innerRadius = outerRadius - 30
   var colors : Option[js.Array[String]] = None
   var ZoomLevel = 1.0
+  var padAngle = 0.05
+  var mergable = "false"
 
+  val myRandomColors = js.Array[String]("matrix.length-1")
+  for(n <- 0 until matrix.length){
+    myRandomColors(n) = "#" + randomAlphanumericString(6)
+  }
+
+  def update(toChange : String, value : Any): Unit = toChange match{
+    case "padding" => padAngle = value.asInstanceOf[Double]
+    case "mergable" => mergable = value.asInstanceOf[String]
+    case "outerRadius" => outerRadius = value.asInstanceOf[Double]
+    case "innerRadius" => innerRadius = value.asInstanceOf[Double]
+    case "width" => width = value.asInstanceOf[Double]
+    case "height" => height = value.asInstanceOf[Double]
+
+  }
   def defcolors(listofcolors : js.Array[String]): Unit =
   {
     colors = Some(listofcolors)
   }
 
-  val zoom = (d: js.Any) => {
-    //d.asInstanceOf[Selection[ChordArray]]
-    val p = d3
-    d3.event.preventDefault()
-    //zoom
-    if(d3.event.asInstanceOf[WheelEvent].deltaY < 0){
-      ZoomLevel += 0.1
-    }
-    //dezoom
-    else{
-      ZoomLevel -= 0.1
-    }
+
+  def printgraph(): Unit ={
 
 
-    val delta = d3.event.asInstanceOf[WheelEvent].deltaY
-    val zoomScale = Math.pow(1.1, delta/360)
-
-    val e = d3.event.asInstanceOf[WheelEvent]
-    println(zoomScale)
-
-    val mouse = d3.mouse(svg.node())
-    println(mouse(0))
-    println(mouse(1))
-
-    val select = d3.select("svg")
-      .attr("transform", "translate(" + 0 + ", " + 0 + ") scale(" + ZoomLevel + ") translate(-" + 0 + ", -" + 0 + ")")
-      //.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ") scale(" + zoomLevel + ") translate(-" + mouse(0) + ", -" + mouse(1) + ")")
-        //.transition()
-        //.duration()
-  }
-
-  val svg = d3.select("svg")
     /*
     .append("svg")
     .attr("width", "100%")
@@ -74,42 +71,104 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]], padAngle : Double){
     .append("g")
     */
 
-  var width = svg.attr("width").toDouble
-  var height = svg.attr("height").toDouble
-  val outerRadius = Math.min(width, height) * 0.5 - 40
-  val innerRadius = outerRadius - 30
-
-  val formatValue = d3.formatPrefix(",.0", 1e3)
-
-  val chord = d3.chord().padAngle(padAngle).sortSubgroups(d3.descending)
-
-  val arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius)
-
-  val ribbon = d3.ribbon().radius(innerRadius)
-
-  var color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(js.Array("#000000", "#FFDD89", "#957244", "#F26223"))
+    //svg.call(d3.zoom().on("zoom", () => d3.select("svg").attr("transform", d3.event.transform.toString)))
 
 
-  val g: Selection[ChordArray] = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")").datum(chord(matrix))
 
-  svg.on("wheel", zoom)
+    val formatValue = d3.formatPrefix(",.0", 1e3)
+    val chord = d3.chord().padAngle(padAngle).sortSubgroups(d3.descending)
+    val arc = d3.arc().innerRadius(innerRadius).outerRadius(outerRadius)
+    val ribbon = d3.ribbon().radius(innerRadius)
+    var color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(myRandomColors)
+    val g: Selection[ChordArray] = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")").datum(chord(matrix))
 
-  /*g.on("wheel", (d:Any) => {
-    println(d3.event.asInstanceOf[WheelEvent].deltaY)
-    var zoomLevel = 0.0
-    if(d3.event.asInstanceOf[WheelEvent].deltaY < 0){
-      zoomLevel = 0.5
+    val zoom = (d: js.Any) => {
+      d3.event.preventDefault()
+      //zoom
+      if(d3.event.asInstanceOf[WheelEvent].deltaY < 0){
+        ZoomLevel += 0.1
+      }
+      //dezoom
+      else{
+        ZoomLevel -= 0.1
+      }
+
+      val mouse = d3.mouse(svg.node())
+
+      val select = d3.select("svg")
+        .attr("transform", "translate(" + 0 + ", " + 0 + ") scale(" + ZoomLevel + ") translate(-" + 0 + ", " + 0 + ")")
+      //.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ") scale(" + zoomLevel + ") translate(-" + mouse(0) + ", -" + mouse(1) + ")")
+      //.transition()
+      //.duration()
     }
-    else {
-      zoomLevel = 2.0
+    svg.on("wheel", zoom)
+
+    colors match {
+      case Some(c) => color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(c)
+        println("colors defined")
+        println(c)
+      case None => color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(myRandomColors)
+        println("colors undefined")
+        colors = Some(myRandomColors)
     }
-    val mouse = d3.mouse(svg.node())
-    val select = d3.select("svg")
-      .attr("transform", "translate(" + (width/2) + "," + (height/2) + ") scale(" + zoomLevel + ") translate(-" + mouse(0) + ", -" + mouse(1) + ")")
-    height = height/2
-    width = width/2
-  })
-  */
+
+    val group = g.append("g").attr("class", "groups")
+      .selectAll("g")
+      .data((c: ChordArray) => c.groups)
+      .enter().append("g")
+      //.on("click", giveinfo(_))
+
+    group.append("path").style("fill", (d: ChordGroup) => color(d.index))
+      .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
+      .attr("d", (x: ChordGroup) => arc(x))
+      .attr("id",(d:ChordGroup) => "chordgroup" + d.index)
+      .attr("color", (d: ChordGroup) => d3.rgb(color(d.index)))
+      .attr("selected", "false")
+      .on("click", (d:ChordGroup) => {
+        val sel = d3selection.select("#chordgroup"+ d.index).attr("selected")
+        if(sel == "false"){
+          if(mergable == "true"){
+            for(index2 <- 0 until matrix.length){
+              val currentSel = d3selection.select("#chordgroup"+ index2).attr("selected")
+              if(currentSel == "true"){
+                merge(index2, d)
+              }
+            }
+          }
+          val mygroup = d3selection.select("#chordgroup"+ d.index)
+            .attr("style", "fill : rgb(0,0,0)")
+            .attr("selected", "true")
+        }
+        else if(sel == "true"){
+          val color = d3selection.select("#chordgroup"+ d.index).attr("color")
+          val mygroup = d3selection.select("#chordgroup"+ d.index)
+            .attr("style", "fill : "+color)
+            .attr("selected", "false")
+        }
+        //val color = d3selection.select("#chordgroup"+ d.index).attr("color")
+      })
+
+    var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, 1e3))
+      .enter().append("g").attr("class", "group-tick")
+      .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
+
+
+    groupTick.append("line").attr("x2", 6)
+
+    groupTick.filter((d: js.Dictionary[Double]) => d("value") % 5e3 == 0).append("text")
+      .attr("x", 8)
+      .attr("dy", ".35em")
+      .attr("transform", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "rotate(180) translate(-16)" else null)
+      .style("text-anchor", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "end" else null)
+      .text((d: js.Dictionary[Double]) => formatValue(d("value")))
+
+    g.append("g").attr("class", "ribbons").selectAll("path").data((c: ChordArray) => c)
+      .enter().append("path")
+      .attr("d", (d: Chord) => ribbon(d))
+      .style("fill", (d: Chord) => color(d.target.index))
+      .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
+
+  }
 
   //when called, merge the d-th chordgroup of the chord diagram with the index2-th
   def merge(index2 : Int, d : ChordGroup) : Unit ={
@@ -182,91 +241,31 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]], padAngle : Double){
       }
     }
     d3selection.select("g").remove()
-    val newplot = new myDSLchordgroup(newMatrix, 0.05)
+    val newplot = new myDSLchordgroup(newMatrix)
     colors match {
-      case Some(c) => newplot.defcolors(c)
-      case None => defcolors(js.Array("#000000", "#FFDD89", "#957244", "#F26223"))
+      case Some(c) =>
+        val newColors = js.Array[String]("newMatrix.length-1")
+        for(i <- 0 until newMatrix.length){
+          if(i < deletedIndex){
+            newColors(i) = c(i)
+          }
+          else{
+            newColors(i) = c(i+1)
+          }
+        }
+        println("LOOOOOL")
+        println(c)
+        println(newColors)
+        newplot.defcolors(newColors)
+      case None => newplot.defcolors(myRandomColors)
     }
+
+    newplot("padding") = padAngle
+    newplot("mergable") = mergable
 
     newplot.printgraph()
 
   }
-
-
-  def printgraph(): Unit ={
-
-
-
-    colors match {
-      case Some(c) => color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(c)
-      case None => color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(js.Array("#000000", "#FFDD89", "#957244", "#F26223"))
-    }
-
-    val group = g.append("g").attr("class", "groups")
-      .selectAll("g")
-      .data((c: ChordArray) => c.groups)
-      .enter().append("g")
-
-
-
-      //.on("click", giveinfo(_))
-
-    group.append("path").style("fill", (d: ChordGroup) => color(d.index))
-      .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
-      .attr("d", (x: ChordGroup) => arc(x))
-      .attr("id",(d:ChordGroup) => "chordgroup" + d.index)
-      .attr("color", (d: ChordGroup) => d3.rgb(color(d.index)))
-      .attr("selected", "false")
-      .on("click", (d:ChordGroup) => {
-        val sel = d3selection.select("#chordgroup"+ d.index).attr("selected")
-        if(sel == "false"){
-          for(index2 <- 0 to matrix.length-1){
-            val currentSel = d3selection.select("#chordgroup"+ index2).attr("selected")
-            if(currentSel == "true")
-              {
-                merge(index2, d)
-              }
-
-          }
-          val mygroup = d3selection.select("#chordgroup"+ d.index)
-            .attr("style", "fill : rgb(0,0,0)")
-            .attr("selected", "true")
-        }
-        else if(sel == "true"){
-          val color = d3selection.select("#chordgroup"+ d.index).attr("color")
-
-          val mygroup = d3selection.select("#chordgroup"+ d.index)
-            .attr("style", "fill : "+color)
-            .attr("selected", "false")
-        }
-        val color = d3selection.select("#chordgroup"+ d.index).attr("color")
-      })
-
-
-
-
-    var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, 1e3))
-      .enter().append("g").attr("class", "group-tick")
-      .attr("transform", (d: js.Dictionary[Double]) =>  "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
-
-
-    groupTick.append("line").attr("x2", 6)
-
-    groupTick.filter((d: js.Dictionary[Double]) => d("value") % 5e3 == 0).append("text")
-      .attr("x", 8)
-      .attr("dy", ".35em")
-      .attr("transform", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "rotate(180) translate(-16)" else null)
-      .style("text-anchor", (d: js.Dictionary[Double]) => if(d("angle") > Math.PI) "end" else null)
-      .text((d: js.Dictionary[Double]) => formatValue(d("value")))
-
-    g.append("g").attr("class", "ribbons").selectAll("path").data((c: ChordArray) => c)
-      .enter().append("path")
-      .attr("d", (d: Chord) => ribbon(d))
-      .style("fill", (d: Chord) => color(d.target.index))
-      .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
-
-  }
-
 
 
 }
