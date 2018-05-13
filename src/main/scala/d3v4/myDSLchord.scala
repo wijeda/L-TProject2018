@@ -1,6 +1,7 @@
 package d3v4
 
 import example.ScalaJSExample.groupTicks
+import org.scalajs.dom.raw.WheelEvent
 
 import scalajs.js
 import scalajs.js.{`|`, undefined}
@@ -22,30 +23,59 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]], padAngle : Double){
   }
 
   isSquaredMatrix(matrix)
-  
+
   var colors : Option[js.Array[String]] = None
+  var ZoomLevel = 1.0
 
   def defcolors(listofcolors : js.Array[String]): Unit =
   {
     colors = Some(listofcolors)
   }
 
-  val mousewheeled = (d: js.Any) => {
+  val zoom = (d: js.Any) => {
+    //d.asInstanceOf[Selection[ChordArray]]
+    val p = d3
+    d3.event.preventDefault()
+    //zoom
+    if(d3.event.asInstanceOf[WheelEvent].deltaY < 0){
+      ZoomLevel += 0.1
+    }
+    //dezoom
+    else{
+      ZoomLevel -= 0.1
+    }
 
 
-    val zoomLevel = 2
+    val delta = d3.event.asInstanceOf[WheelEvent].deltaY
+    val zoomScale = Math.pow(1.1, delta/360)
+
+    val e = d3.event.asInstanceOf[WheelEvent]
+    println(zoomScale)
+
     val mouse = d3.mouse(svg.node())
+    println(mouse(0))
+    println(mouse(1))
 
     val select = d3.select("svg")
-      //.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ") scale(" + zoomLevel + ") translate(" + mouse(0) + ", " + mouse(1) + ")")
+      .attr("transform", "translate(" + 0 + ", " + 0 + ") scale(" + ZoomLevel + ") translate(-" + 0 + ", -" + 0 + ")")
       //.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ") scale(" + zoomLevel + ") translate(-" + mouse(0) + ", -" + mouse(1) + ")")
         //.transition()
         //.duration()
   }
 
   val svg = d3.select("svg")
-  val width = svg.attr("width").toDouble
-  val height = svg.attr("height").toDouble
+    /*
+    .append("svg")
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .call(d3.zoom().on("zoom", () => {
+      svg.attr("transform", d3.event.transform)
+    }))
+    .append("g")
+    */
+
+  var width = svg.attr("width").toDouble
+  var height = svg.attr("height").toDouble
   val outerRadius = Math.min(width, height) * 0.5 - 40
   val innerRadius = outerRadius - 30
 
@@ -62,9 +92,26 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]], padAngle : Double){
 
   val g: Selection[ChordArray] = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")").datum(chord(matrix))
 
-  g.on("click", mousewheeled)
+  svg.on("wheel", zoom)
 
-  //when called, merge the d-th chordgroup of the chord diagram with the a-th
+  /*g.on("wheel", (d:Any) => {
+    println(d3.event.asInstanceOf[WheelEvent].deltaY)
+    var zoomLevel = 0.0
+    if(d3.event.asInstanceOf[WheelEvent].deltaY < 0){
+      zoomLevel = 0.5
+    }
+    else {
+      zoomLevel = 2.0
+    }
+    val mouse = d3.mouse(svg.node())
+    val select = d3.select("svg")
+      .attr("transform", "translate(" + (width/2) + "," + (height/2) + ") scale(" + zoomLevel + ") translate(-" + mouse(0) + ", -" + mouse(1) + ")")
+    height = height/2
+    width = width/2
+  })
+  */
+
+  //when called, merge the d-th chordgroup of the chord diagram with the index2-th
   def merge(index2 : Int, d : ChordGroup) : Unit ={
 
     val newMatrix = new js.Array[js.Array[Double]](matrix.length-1)
