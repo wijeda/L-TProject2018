@@ -92,16 +92,49 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
     val ribbon = d3.ribbon().radius(innerRadius)
     var color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(myRandomColors)
     var name = js.Array[String]()
-    val g: Selection[ChordArray] = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")").datum(chord(matrix))
+    val g: Selection[ChordArray] = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")").datum(chord(matrix)).attr("id", "datgroup")
 
     svg.call(d3.zoom().on("zoom",  () => g.attr("transform", d3.event.transform.toString)))
+    /*val zoom = (d: js.Any) => {
+      d3.event.preventDefault()
+      //zoom
+      if(d3.event.asInstanceOf[WheelEvent].deltaY < 0 && ZoomLevel < 5.0){
+        ZoomLevel += 0.1
+      }
+      //dezoom
+      else if(ZoomLevel > 0.1){
+        ZoomLevel -= 0.1
+      }
+
+      val mouse = d3.mouse(svg.node())
+
+      val select = d3.select("svg")
+        .attr("transform", "translate(" + 0 + ", " + 0 + ") scale(" + ZoomLevel + ") translate(-" + 0 + ", " + 0 + ")")
+      //.attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ") scale(" + zoomLevel + ") translate(-" + mouse(0) + ", -" + mouse(1) + ")")
+      //.transition()
+      //.duration()
+    }
+    svg.on("wheel", zoom)*/
 
     colors match {
       case Some(c) => color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(c)
-        println("colors defined")
-        println(c)
+        if(c.length < matrix.length){
+          var newColors = js.Array[String]("matrix.length-1")
+          for(indexColor <- 0 until matrix.length){
+            if(indexColor < c.length){
+              newColors(indexColor) = c(indexColor)
+            }
+            else{
+              newColors(indexColor) = "#" + randomAlphanumericString(6)
+            }
+          }
+          colors = Some(newColors)
+          color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(newColors)
+        }
+        else{
+          color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(c)
+        }
       case None => color = d3.scaleOrdinal[Int, String]().domain(d3.range(4)).range(myRandomColors)
-        println("colors undefined")
         colors = Some(myRandomColors)
     }
 
@@ -134,7 +167,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
             for(index2 <- 0 until matrix.length){
               val currentSel = d3selection.select("#chordgroup"+ index2).attr("selected")
               if(currentSel == "true"){
-                merge(index2, d)
+                merge(index2, d.index, 1)
               }
             }
           }
@@ -275,7 +308,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
   }
 
   //when called, merge the d-th chordgroup of the chord diagram with the index2-th
-  def merge(index2 : Int, d : ChordGroup) : Unit ={
+  def merge(index2 : Int, indexD : Int, fromOutside: Int = 0) : Unit ={
 
     val newMatrix = new js.Array[js.Array[Double]](matrix.length-1)
     for(j <- 0 to newMatrix.length -1){
@@ -285,30 +318,30 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
     //calculates the new line merging the ones from the merged entries
     val newLine = new Array[Double](matrix.length)
     for(i <- 0 to matrix.length-1){
-      newLine(i) = matrix(index2)(i) + matrix(d.index)(i)
+      newLine(i) = matrix(index2)(i) + matrix(indexD)(i)
     }
     val newColumn = new Array[Double](matrix.length)
     var newIndex = 0
     var deletedIndex = 0
     //we take the smallest index between the two merged, it will be the
-    if(d.index<index2){
-      newIndex = d.index
+    if(indexD<index2){
+      newIndex = indexD
       deletedIndex = index2
     }
     else{
       newIndex = index2
-      deletedIndex = d.index
+      deletedIndex = indexD
     }
 
     //calculates the new column merging the ones from the merged entries
     for(i <- 0 to matrix.length-1){
       if(i == newIndex)
       {
-        newColumn(i) = newLine(index2) + newLine(d.index)
+        newColumn(i) = newLine(index2) + newLine(indexD)
       }
       else if(i != deletedIndex)
       {
-        newColumn(i) = matrix(i)(index2) + matrix(i)(d.index)
+        newColumn(i) = matrix(i)(index2) + matrix(i)(indexD)
       }
     }
     //fill the new matrix
@@ -344,6 +377,9 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
         }
       }
     }
+    if(fromOutside == 0){
+      d3selection.select("svg").html("")
+    }
     d3selection.select("g").remove()
     val newplot = new myDSLchordgroup(newMatrix)
     colors match {
@@ -357,9 +393,6 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
             newColors(i) = c(i+1)
           }
         }
-        println("LOOOOOL")
-        println(c)
-        println(newColors)
         newplot.defcolors(newColors)
       case None => newplot.defcolors(myRandomColors)
     }
