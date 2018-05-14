@@ -54,7 +54,7 @@ object ScalaJSExample {
       js.Array(1013, 990, 940, 6907)
     )
 
-    val test = new myDSLchordgroup(myMatrix)
+    val test = new myDSLchordgroup(randomMatrixFixedSize)
     test.defcolors(js.Array("#ABC123", "#AACCBB", "#123456", "#654321", "#FACDEB"))
     test("mergable") = "true"
     test.defnames(nameMatrix)

@@ -198,8 +198,8 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
         }
         d3selection.select("#chordgroup"+d.index)
           .style("opacity", "1.0")
-        d3selection.select("#groupLabel"+d.index)
-          .style("visibility", "visible")
+        /*d3selection.select("#groupLabel"+d.index)
+          .style("visibility", "visible")*/
         for(i <- 0 until matrix.length){
           d3selection.select("#ribbonID"+d.index+i)
             .style("opacity", "1.0")
@@ -223,8 +223,8 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
               .style("opacity", "1.0")
           }
         }
-        d3selection.select("#groupLabel"+d.index)
-          .style("visibility", "hidden")
+        /*d3selection.select("#groupLabel"+d.index)
+          .style("visibility", "hidden")*/
         if(false){
           return
         }
@@ -401,12 +401,13 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
         val newNames = js.Array[String]("newMatrix.length-1")
         for(i <- 0 until newMatrix.length){
           if(i < deletedIndex){
-            newNames(i) = n(i)+", "+n(index2)
+            newNames(i) = n(i)
           }
           else{
-            newNames(i) = n(i)+", "+n(i+1)
+            newNames(i) = n(i+1)
           }
         }
+        newNames(newIndex) = n(newIndex) + ", " + n(deletedIndex)
         println("names defined")
         println(n)
         newplot.defnames(newNames)
