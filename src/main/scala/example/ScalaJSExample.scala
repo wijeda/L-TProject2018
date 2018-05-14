@@ -10,16 +10,6 @@ object ScalaJSExample {
   @JSExportTopLevel("myproject")
   protected def getInstance(): this.type = this
 
-  def groupTicks(d: ChordGroup, step: Double): js.Array[js.Dictionary[Double]] = {
-    val k: Double = (d.endAngle - d.startAngle) / d.value
-    d3.range(0, d.value, step).map((v: Double) => js.Dictionary("value" -> v, "angle" -> (v * k + d.startAngle)))
-  }
-
-  def groupLabels(d: ChordGroup): js.Array[js.Dictionary[Double]] = {
-    val k: Double = (d.endAngle - d.startAngle) / d.value
-    d3.range((d.value)/2, d.value, (d.value)/2).map((v: Double) => js.Dictionary("value" -> d.value, "angle" -> (v * k + d.startAngle), "id" -> d.index.toDouble))
-  }
-
   @JSExport
   def main(args: Array[String]): Unit = {
 
@@ -58,6 +48,7 @@ object ScalaJSExample {
     test.defcolors(js.Array("#ABC123", "#AACCBB", "#123456", "#654321", "#FACDEB"))
     test("mergable") = "true"
     test.defnames(nameMatrix)
+    test.setFontSize(20)
     test.printgraph()
   }
 
