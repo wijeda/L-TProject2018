@@ -43,6 +43,7 @@ trait ChordGroup extends js.Object{
   def endAngle: Double = js.native
   def value: Double = js.native
   def index: Int = js.native
+  def angle: Double = js.native
 }
 
 @js.native
