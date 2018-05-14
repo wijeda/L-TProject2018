@@ -358,6 +358,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
       .attr("id",(d:ChordGroup) => "chordgroup" + d.index)
       .attr("color", (d: ChordGroup) => d3.rgb(color(d.index)))
       .attr("selected", "false")
+      // When two groups are selected: merged them. A clic on a group is a selection
       .on("click", (d:ChordGroup) => {
         val sel = d3selection.select("#chordgroup"+ d.index).attr("selected")
         if(sel == "false"){
@@ -381,9 +382,8 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
         }
         //val color = d3selection.select("#chordgroup"+ d.index).attr("color")
       })
+      // When hovering over a group, hide the others and display the group info
       .on("mouseover", (d: ChordGroup) => {
-        /*d3selection.select("#ribbonID"+d.source.index+d.target.index)
-          .style("opacity", "0.2")*/
         for(i <- 0 until matrix.length){
           d3selection.select("#chordgroup"+i)
             .style("opacity", "0.2")
@@ -396,8 +396,6 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
         }
         d3selection.select("#chordgroup"+d.index)
           .style("opacity", "1.0")
-        /*d3selection.select("#groupLabel"+d.index)
-          .style("visibility", "visible")*/
         for(i <- 0 until matrix.length){
           d3selection.select("#ribbonID"+d.index+i)
             .style("opacity", "1.0")
@@ -412,6 +410,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
           return
         }
       })
+      // When hovering out of a group, hide the group info and display other groups normally
       .on("mouseout", (d: ChordGroup) => {
         /*d3selection.select("#ribbonID"+d.source.index+d.target.index)
           .style("opacity", "1.0")*/
@@ -433,6 +432,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
         }
       })
 
+    // If the names have been defined, diplay them. Else display ticks
     if(!nameIsDefined) {
       var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, 1e3))
         .enter().append("g").attr("class", "group-tick")
@@ -477,6 +477,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
       .attr("id",(d:Chord) => "ribbonID" + d.source.index+d.target.index)
       .style("fill", (d: Chord) => color(d.target.index))
       .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
+      // When hovering over a ribbon, hide the others and display the ribbon info
       .on("mouseover", (d: Chord) => {
         for(i <- 0 until matrix.length; j <- 0 until matrix.length){
           d3selection.select("#ribbonID"+j+i)
@@ -494,6 +495,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
           return
         }
       })
+      // When hovering out of a ribbon, hide the ribbon info and display other ribbons normally
       .on("mouseout", (d: Chord) => {
         for(i <- 0 until matrix.length; j <- 0 until matrix.length){
           d3selection.select("#ribbonID"+j+i)
