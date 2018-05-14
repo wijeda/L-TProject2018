@@ -38,6 +38,8 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
   var mergable = "false"
   // The size of the names/ticks
   var fontSize = 10
+  // Display only ticks, labels, both or nothing
+  var displayLabels: String = "both"
   // The block of info shown when hovering the chord graph
   var infobox = d3selection.select("#infobox")
   // Generate a JS.ARRAY of random colors
@@ -49,6 +51,31 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
   //***********************************************************
   //  GLOBAL METHODS DEFINITION
   //***********************************************************
+  // Set all parameter contained in the param dictionary
+  def set(param: Map[String, Any])={
+    for(p <- param){
+      p match {
+        case ("padding",value) => padAngle = value.asInstanceOf[Double]
+        case ("mergable",value) => mergable = value.asInstanceOf[String]
+        case ("outerRadius",value) => outerRadius = value.asInstanceOf[Double]
+        case ("innerRadius",value) => innerRadius = value.asInstanceOf[Double]
+        case ("width",value) => width = value.asInstanceOf[Double]
+        case ("height",value) => height = value.asInstanceOf[Double]
+        case ("font-size",value) => fontSize = value.asInstanceOf[Int]
+        case ("displayLabels",value) => displayLabels = value.asInstanceOf[String]
+        case ("colors",value) => defcolors(value.asInstanceOf[js.Array[String]])
+        case ("names",value) => defnames(value.asInstanceOf[js.Array[String]])
+      }
+    }
+  }
+  def setDisplayLables(choice: String)={
+    choice match{
+      case "ticks" => displayLabels = choice
+      case "labels" => displayLabels = choice
+      case "both" => displayLabels = choice
+      case _ => displayLabels = "nothing"
+    }
+  }
   // Generate a random string of length n from the given alphabet
   def randomString(alphabet: String)(n: Int): String =
     Stream.continually(random.nextInt(alphabet.size)).map(alphabet).take(n).mkString
@@ -82,17 +109,18 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
     case "width" => width = value.asInstanceOf[Double]
     case "height" => height = value.asInstanceOf[Double]
     case "font-size" => fontSize = value.asInstanceOf[Int]
-
+    case "displayLabels" => displayLabels = value.asInstanceOf[String]
   }
 
   // Defines the color list
-  def defcolors(listofcolors : js.Array[String]): Unit =
-  {
+  def defcolors(listofcolors : js.Array[String]): Unit ={
     colors = Some(listofcolors)
   }
   // Defines the names/labels list
-  def defnames(listofnames : js.Array[String]): Unit =
-  {
+  def defnames(listofnames : js.Array[String]): Unit ={
+    while(listofnames.length != 0 && listofnames.length < matrix.length){
+      listofnames.push("")
+    }
     names = Some(listofnames)
   }
 
@@ -119,6 +147,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
     //***********************************************************
     // Formats the doubles to the given specifier
     val formatValue = d3.formatPrefix(",.0", 1e3)
+    val formatValuePercent = d3.formatPrefix(".0%", 1)
     // The chords of the graph
     val chord = d3.chord().padAngle(padAngle).sortSubgroups(d3.descending)
     // The arc represent the groups
@@ -206,11 +235,11 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
         case true =>
           return ("Group Info:<br/>"
             + "Name: "+name(d.index)+", Total value: " + d.value+ "<br/>"
-            + (d.value/total)*100 + "% over "+total)
+            + formatValuePercent((d.value/total)*100) + "% over "+total)
         case false =>
           return ("Group Info:<br/>"
             + "Total value: " + d.value + "<br/>"
-            + (d.value/total)*100 + "% over "+total)
+            + formatValuePercent((d.value/total)*100) + "% over "+total)
       }
     }
     // Used when mouse hover over ribbons to display info
@@ -339,6 +368,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
       newplot("padding") = padAngle
       newplot("mergable") = mergable
       newplot("font-size") = fontSize
+      newplot("displayLabels") = displayLabels
       newplot.printgraph()
 
     }
@@ -403,8 +433,8 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
             .style("opacity", "1.0")
         }
         infobox.style("visibility", "visible")
-          .style("top", d3.event.x+"px")
-          .style("left", d3.event.y+"px")
+          .style("top", (d3.event.y+10)+"px")
+          .style("left", (d3.event.x+10)+"px")
           .html(groupTip(d))
         if(false){
           return
@@ -433,7 +463,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
       })
 
     // If the names have been defined, diplay them. Else display ticks
-    if(!nameIsDefined) {
+    if(displayLabels == "ticks" || displayLabels == "both") {
       var groupTick = group.selectAll(".group-tick").data((d: ChordGroup) => groupTicks(d, 1e3))
         .enter().append("g").attr("class", "group-tick")
         .attr("transform", (d: js.Dictionary[Double]) => "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + outerRadius + ",0)")
@@ -448,7 +478,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
         .style("text-anchor", (d: js.Dictionary[Double]) => if (d("angle") > Math.PI) "end" else null)
         .text((d: js.Dictionary[Double]) => formatValue(d("value")))
     }
-    else {
+    if(displayLabels == "labels" || displayLabels== "both") {
       var groupLabel = group.selectAll(".group-label").data((d: ChordGroup) => groupLabels(d))
         .enter().append("g").attr("class", "group-label")
         .attr("transform", (d: js.Dictionary[Double]) => "rotate(" + (d("angle") * 180 / Math.PI - 90) + ") translate(" + (outerRadius ) + ",0)")
@@ -468,7 +498,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
           if (!name.isEmpty) {
             n = (name(d("id").toInt)+ " ")
           }
-          n + "ID:" + formatValue(d("id")) + ", Total:" + formatValue(d("value"))
+          n + "ID:" + (d("id")) + ", Total:" + formatValue(d("value"))
         })
     }
     g.append("g").attr("class", "ribbons").selectAll("path").data((c: ChordArray) => c)
@@ -488,8 +518,8 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
         d3selection.select("#ribbonID"+d.source.index+d.target.index)
           .style("opacity", "1.0")
         infobox.style("visibility", "visible")
-          .style("top", d3.event.x+"px")
-          .style("left", d3.event.y+"px")
+          .style("top", (d3.event.y+10)+"px")
+          .style("left", (d3.event.x+10)+"px")
           .html(chordTip(d))
         if(false){
           return

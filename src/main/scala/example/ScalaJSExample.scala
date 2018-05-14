@@ -35,8 +35,8 @@ object ScalaJSExample {
       js.Array(r.nextInt(20000),r.nextInt(20000),r.nextInt(20000),r.nextInt(20000),r.nextInt(20000))
     )
 
-    val nameMatrix = js.Array[String]("Antoine","Bernard","Cédric","David","Eleonore")
-
+    val nameList = js.Array[String]("Antoine","Bernard","Cédric","David","Eleonore")
+    val colorList = js.Array[String]("#ABC123", "#AACCBB", "#123456", "#654321", "#FACDEB")
     val testMatrix = js.Array[js.Array[Double]](
       js.Array(11975, 5871, 8916, 2868),
       js.Array(1951, 10048, 2060, 6171),
@@ -45,10 +45,13 @@ object ScalaJSExample {
     )
 
     val test = new myDSLchordgroup(randomMatrixFixedSize)
-    test.defcolors(js.Array("#ABC123", "#AACCBB", "#123456", "#654321", "#FACDEB"))
-    test("mergable") = "true"
-    test.defnames(nameMatrix)
-    test.setFontSize(20)
+    //test.defcolors(colorList)
+    //test("mergable") = "true"
+    test.set(Map("padding"->0.05,"mergable"->"true","font-size"->20,"displayLabels"->"labels","colors"->colorList,"names"->nameList))
+    //test.defnames(nameList)
+    //test.setFontSize(20)
+    //test.setDisplayLables("labels")
+    //test.addGroup(js.Array(r.nextInt(20000),r.nextInt(20000),r.nextInt(20000),r.nextInt(20000),r.nextInt(20000),r.nextInt(20000)))
     test.printgraph()
   }
 
