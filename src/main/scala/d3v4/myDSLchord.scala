@@ -8,7 +8,15 @@ import scala.scalajs.js.annotation._
 import scala.io.Source
 import scala.util.matching.Regex.Match
 
-class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
+class myDSLchordgroup(matrix : js.Array[js.Array[Double]]) {
+
+  for (a <- 0 until matrix.length) {
+    if (matrix(a).length != matrix.length) {
+      println("matrix not square")
+      throw new IllegalArgumentException
+    }
+  }
+  //inspired by http://www.bindschaedler.com/2012/04/07/elegant-random-string-generation-in-scala/
   //***********************************************************
   //  GLOBAL VARIABLE DEFINITION
   //***********************************************************
@@ -25,9 +33,9 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
   var outerRadius = Math.min(width, height) * 0.5 - 40
   var innerRadius = outerRadius - 30
   // The color set of this graph
-  var colors : Option[js.Array[String]] = None
+  var colors: Option[js.Array[String]] = None
   // The list of names for the graph elements
-  var names : Option[js.Array[String]] = None
+  var names: Option[js.Array[String]] = None
   // If the names are not defined, we will show the ticks
   var nameIsDefined: Boolean = false
   // The size of the chord graph within the webpage
@@ -113,7 +121,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
   }
 
   // Defines the color list
-  def defcolors(listofcolors : js.Array[String]): Unit ={
+  def defcolors(listofcolors: js.Array[String]): Unit = {
     colors = Some(listofcolors)
   }
   // Defines the names/labels list
@@ -129,18 +137,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
     * Build the chord graph respecting the index.html structure
     * with the given matrix, colors list and names list
     */
-  def printgraph(): Unit ={
-    /*
-    .append("svg")
-    .attr("width", "100%")
-    .attr("height", "100%")
-    .call(d3.zoom().on("zoom", () => {
-      svg.attr("transform", d3.event.transform)
-    }))
-    .append("g")
-    */
-
-    //svg.call(d3.zoom().on("zoom", () => d3.select("svg").attr("transform", d3.event.transform.toString)))
+  def printgraph(): Unit = {
 
     //***********************************************************
     //  VARIABLE DEFINITION
@@ -160,7 +157,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
     val g: Selection[ChordArray] = svg.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")").datum(chord(matrix)).attr("id", "datgroup")
 
     // This call allow the user to zoom in and out on the chord graph
-    svg.call(d3.zoom().on("zoom",  () => g.attr("transform", d3.event.transform.toString)))
+    svg.call(d3.zoom().on("zoom", () => g.attr("transform", d3.event.transform.toString)))
 
     // Define the appearing info bloc style
     infobox.style("display", "block")
@@ -249,17 +246,17 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
       nameIsDefined match{
         case true =>
           return ("Chord Info:<br/>"
-            + "Send: " +matrix(s)(t) + " From: "+name(s)+"<br/>"
-            + "Receive: " +matrix(t)(s) + " Target: " + name(t))
+            + "Send: " + matrix(s)(t) + " From: " + name(s) + "<br/>"
+            + "Receive: " + matrix(t)(s) + " Target: " + name(t))
         case false =>
           return ("Chord Info:<br/>"
-            + "Send: " + matrix(s)(t)+"<br/>"
+            + "Send: " + matrix(s)(t) + "<br/>"
             + "Receive: " + matrix(t)(s))
       }
     }
 
     //when called, merge the d-th chordgroup of the chord diagram with the index2-th
-    def merge(index2 : Int, indexD : Int, fromOutside: Int = 0) : Unit ={
+    def merge(index2: Int, indexD: Int, fromOutside: Int = 0): Unit = {
 
       val newMatrix = new js.Array[js.Array[Double]](matrix.length-1)
       for(j <- 0 to newMatrix.length -1){
@@ -380,12 +377,12 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
       .selectAll("g")
       .data((c: ChordArray) => c.groups)
       .enter().append("g")
-      //.on("click", giveinfo(_))
+    //.on("click", giveinfo(_))
 
     group.append("path").style("fill", (d: ChordGroup) => color(d.index))
       .style("stroke", (d: ChordGroup) => d3.rgb(color(d.index)).darker())
       .attr("d", (x: ChordGroup) => arc(x))
-      .attr("id",(d:ChordGroup) => "chordgroup" + d.index)
+      .attr("id", (d: ChordGroup) => "chordgroup" + d.index)
       .attr("color", (d: ChordGroup) => d3.rgb(color(d.index)))
       .attr("selected", "false")
       // When two groups are selected: merged them. A clic on a group is a selection

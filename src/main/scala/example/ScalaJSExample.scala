@@ -17,7 +17,7 @@ object ScalaJSExample {
 
     val r = scala.util.Random
 
-    val matrixSize = r.nextInt(15) + 5
+    val matrixSize = r.nextInt(2) + 5
 
     val myMatrix = new js.Array[js.Array[Double]](matrixSize)
     for(j <- 0 to matrixSize){
