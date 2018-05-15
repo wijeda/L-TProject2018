@@ -13,7 +13,7 @@ object ScalaJSExample {
   @JSExport
   def main(args: Array[String]): Unit = {
 
-    import d3v4.myDSLchordgroup
+    import d3v4.chordDiagram
 
     val r = scala.util.Random
 
@@ -44,15 +44,19 @@ object ScalaJSExample {
       js.Array(1013, 990, 940, 6907)
     )
 
-    val test = new myDSLchordgroup(randomMatrixFixedSize)
+    val myDiagram = new chordDiagram(myMatrix)
+    myDiagram.setDisplayLables("labels")
+    myDiagram.printgraph()
+
+    
     //test.defcolors(colorList)
     //test("mergable") = "true"
-    test.set(Map("padding"->0.05,"mergable"->"true","font-size"->20,"displayLabels"->"labels","colors"->colorList,"names"->nameList))
+    //test.set(Map("padding"->0.05,"mergable"->"true","font-size"->20,"displayLabels"->"labels","colors"->colorList,"names"->nameList))
     //test.defnames(nameList)
     //test.setFontSize(20)
-    //test.setDisplayLables("labels")
+
     //test.addGroup(js.Array(r.nextInt(20000),r.nextInt(20000),r.nextInt(20000),r.nextInt(20000),r.nextInt(20000),r.nextInt(20000)))
-    test.printgraph()
+
   }
 
 }

@@ -8,7 +8,7 @@ import scala.scalajs.js.annotation._
 import scala.io.Source
 import scala.util.matching.Regex.Match
 
-class myDSLchordgroup(matrix : js.Array[js.Array[Double]]) {
+class chordDiagram(matrix : js.Array[js.Array[Double]]) {
 
   for (a <- 0 until matrix.length) {
     if (matrix(a).length != matrix.length) {
@@ -329,7 +329,7 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]) {
         d3selection.select("svg").html("")
       }
       d3selection.select("g").remove()
-      val newplot = new myDSLchordgroup(newMatrix)
+      val newplot = new chordDiagram(newMatrix)
       colors match {
         case Some(c) =>
           val newColors = js.Array[String]("newMatrix.length-1")
