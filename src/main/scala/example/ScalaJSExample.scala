@@ -46,7 +46,8 @@ object ScalaJSExample {
     )
 
     val myDiagram = new chordDiagram(interactions)
-    myDiagram.set(Map("names"->nameList,"mergeable"->true,"hoverable"->true,"displayLabels"->"both"))
+    //myDiagram.set(Map("names"->nameList,"mergeable"->true,"hoverable"->true,"displayLabels"->"both"))
+    myDiagram("parameters") = Map("names"->nameList,"mergeable"->true,"hoverable"->true,"displayLabels"->"both")
 //    myDiagram.setDisplayLables("labels")
 //    myDiagram("mergable") = true
     //myDiagram("hoverable") = true

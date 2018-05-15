@@ -123,6 +123,23 @@ class chordDiagram(matrix : js.Array[js.Array[Double]]) {
     case "height" => height = value.asInstanceOf[Double]
     case "font-size" => fontSize = value.asInstanceOf[Int]
     case "displayLabels" => displayLabels = value.asInstanceOf[String]
+    case "parameters" =>
+      for(p <- value.asInstanceOf[Map[String, Any]]){
+        p match {
+          case ("padding",v: Double) => padAngle = v
+          case ("mergeable",v: Boolean) => mergeable = v
+          case ("hoverable",v: Boolean) => hoverable = v
+          case ("outerRadius",v: Double) => outerRadius = v
+          case ("innerRadius",v: Double) => innerRadius = v
+          case ("width",v: Double) => width = v
+          case ("height",v: Double) => height = v
+          case ("font-size",v: Int) => fontSize = v
+          case ("displayLabels",v: String) => displayLabels = v
+          case ("colors",v) => defcolors(v.asInstanceOf[js.Array[String]])
+          case ("names",v) => defnames(v.asInstanceOf[js.Array[String]])
+          case (x,y) => println("Wrong parameter: ("+x.toString+","+y.toString+")")
+        }
+      }
   }
 
   // Defines the color list
