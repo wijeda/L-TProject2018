@@ -22,7 +22,7 @@ object ScalaJSExample {
 
     val r = scala.util.Random
 
-    val matrixSize = r.nextInt(15) + 5
+    val matrixSize = r.nextInt(2) + 5
 
     val myMatrix = new js.Array[js.Array[Double]](matrixSize)
     for(j <- 0 to matrixSize){
@@ -32,7 +32,7 @@ object ScalaJSExample {
       }
     }
 
-    val randomMatrixFixedSize = js.Array[js.Array[Double]](
+    /*val randomMatrixFixedSize = js.Array[js.Array[Double]](
       js.Array(r.nextInt(20000),r.nextInt(20000),r.nextInt(20000),r.nextInt(20000),r.nextInt(20000)),
       js.Array(r.nextInt(20000),r.nextInt(20000),r.nextInt(20000),r.nextInt(20000),r.nextInt(20000)),
       js.Array(r.nextInt(20000),r.nextInt(20000),r.nextInt(20000),r.nextInt(20000),r.nextInt(20000)),
@@ -45,12 +45,14 @@ object ScalaJSExample {
       js.Array(1951, 10048, 2060, 6171),
       js.Array(8010, 16145, 8090, 8045),
       js.Array(1013, 990, 940, 6907)
-    )
+    )*/
 
     val test = new myDSLchordgroup(myMatrix)
-    test.defcolors(js.Array("#ABC123", "#AACCBB", "#123456", "#654321", "#FACDEB"))
+    //test.defcolors(js.Array("#ABC123", "#AACCBB", "#123456", "#654321", "#FACDEB"))
     test("mergable") = "true"
     test.printgraph()
   }
+
+
 
 }

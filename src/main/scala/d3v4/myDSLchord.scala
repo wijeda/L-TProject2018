@@ -10,15 +10,13 @@ import scala.io.Source
 
 class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
 
-  val numberRow = matrix.length
-
-  for(a <- 0 to numberRow-1){
-    if(matrix(a).length != numberRow){
+  for(a <- 0 to matrix.length-1){
+    if(matrix(a).length != matrix.length){
       println("matrix not square")
       throw new IllegalArgumentException
     }
   }
-
+  //inspired by http://www.bindschaedler.com/2012/04/07/elegant-random-string-generation-in-scala/
   // Random generator
   val random = new scala.util.Random
   // Generate a random string of length n from the given alphabet
@@ -59,21 +57,6 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
 
 
   def printgraph(): Unit ={
-
-
-    /*
-    .append("svg")
-    .attr("width", "100%")
-    .attr("height", "100%")
-    .call(d3.zoom().on("zoom", () => {
-      svg.attr("transform", d3.event.transform)
-    }))
-    .append("g")
-    */
-
-    //svg.call(d3.zoom().on("zoom", () => d3.select("svg").attr("transform", d3.event.transform.toString)))
-
-
 
     val formatValue = d3.formatPrefix(",.0", 1e3)
     val chord = d3.chord().padAngle(padAngle).sortSubgroups(d3.descending)
@@ -346,6 +329,4 @@ class myDSLchordgroup(matrix : js.Array[js.Array[Double]]){
     newplot.printgraph()
 
   }
-
-
 }
