@@ -43,7 +43,9 @@ class chordDiagram(matrix : js.Array[js.Array[Double]]) {
   // The curvature of the ribbons
   var padAngle = 0.05
   // Are the groups mergeable?
-  var mergable = "false"
+  var mergeable = false
+  // Are the groups hoverable?
+  var hoverable = false
   // The size of the names/ticks
   var fontSize = 10
   // Display only ticks, labels, both or nothing
@@ -63,16 +65,18 @@ class chordDiagram(matrix : js.Array[js.Array[Double]]) {
   def set(param: Map[String, Any])={
     for(p <- param){
       p match {
-        case ("padding",value) => padAngle = value.asInstanceOf[Double]
-        case ("mergable",value) => mergable = value.asInstanceOf[String]
-        case ("outerRadius",value) => outerRadius = value.asInstanceOf[Double]
-        case ("innerRadius",value) => innerRadius = value.asInstanceOf[Double]
-        case ("width",value) => width = value.asInstanceOf[Double]
-        case ("height",value) => height = value.asInstanceOf[Double]
-        case ("font-size",value) => fontSize = value.asInstanceOf[Int]
-        case ("displayLabels",value) => displayLabels = value.asInstanceOf[String]
+        case ("padding",value: Double) => padAngle = value
+        case ("mergeable",value: Boolean) => mergeable = value
+        case ("hoverable",value: Boolean) => hoverable = value
+        case ("outerRadius",value: Double) => outerRadius = value
+        case ("innerRadius",value: Double) => innerRadius = value
+        case ("width",value: Double) => width = value
+        case ("height",value: Double) => height = value
+        case ("font-size",value: Int) => fontSize = value
+        case ("displayLabels",value: String) => displayLabels = value
         case ("colors",value) => defcolors(value.asInstanceOf[js.Array[String]])
         case ("names",value) => defnames(value.asInstanceOf[js.Array[String]])
+        case (x,y) => println("Wrong parameter: ("+x.toString+","+y.toString+")")
       }
     }
   }
@@ -111,7 +115,8 @@ class chordDiagram(matrix : js.Array[js.Array[Double]]) {
   // Automatically called when a myDSLchord instance is applyied whith one of this cases
   def update(toChange : String, value : Any): Unit = toChange match{
     case "padding" => padAngle = value.asInstanceOf[Double]
-    case "mergable" => mergable = value.asInstanceOf[String]
+    case "mergeable" => mergeable = value.asInstanceOf[Boolean]
+    case "hoverable" => hoverable = value.asInstanceOf[Boolean]
     case "outerRadius" => outerRadius = value.asInstanceOf[Double]
     case "innerRadius" => innerRadius = value.asInstanceOf[Double]
     case "width" => width = value.asInstanceOf[Double]
@@ -363,7 +368,8 @@ class chordDiagram(matrix : js.Array[js.Array[Double]]) {
           println("names undefined")
       }
       newplot("padding") = padAngle
-      newplot("mergable") = mergable
+      newplot("mergeable") = mergeable
+      newplot("hoverable") = hoverable
       newplot("font-size") = fontSize
       newplot("displayLabels") = displayLabels
       newplot.printgraph()
@@ -389,7 +395,7 @@ class chordDiagram(matrix : js.Array[js.Array[Double]]) {
       .on("click", (d:ChordGroup) => {
         val sel = d3selection.select("#chordgroup"+ d.index).attr("selected")
         if(sel == "false"){
-          if(mergable == "true"){
+          if(mergeable){
             for(index2 <- 0 until matrix.length){
               val currentSel = d3selection.select("#chordgroup"+ index2).attr("selected")
               if(currentSel == "true"){
@@ -411,51 +417,51 @@ class chordDiagram(matrix : js.Array[js.Array[Double]]) {
       })
       // When hovering over a group, hide the others and display the group info
       .on("mouseover", (d: ChordGroup) => {
-        for(i <- 0 until matrix.length){
-          d3selection.select("#chordgroup"+i)
-            .style("opacity", "0.2")
-          for(j <- 0 until matrix.length) {
-            d3selection.select("#ribbonID" + j + i)
+        if(hoverable) {
+          for (i <- 0 until matrix.length) {
+            d3selection.select("#chordgroup" + i)
               .style("opacity", "0.2")
-            d3selection.select("#ribbonID" + i + j)
-              .style("opacity", "0.2")
+            for (j <- 0 until matrix.length) {
+              d3selection.select("#ribbonID" + j + i)
+                .style("opacity", "0.2")
+              d3selection.select("#ribbonID" + i + j)
+                .style("opacity", "0.2")
+            }
           }
-        }
-        d3selection.select("#chordgroup"+d.index)
-          .style("opacity", "1.0")
-        for(i <- 0 until matrix.length){
-          d3selection.select("#ribbonID"+d.index+i)
+          d3selection.select("#chordgroup" + d.index)
             .style("opacity", "1.0")
-          var f = d3selection.select("#ribbonID"+i+d.index)
-            .style("opacity", "1.0")
-        }
-        infobox.style("visibility", "visible")
-          .style("top", (d3.event.y+10)+"px")
-          .style("left", (d3.event.x+10)+"px")
-          .html(groupTip(d))
-        if(false){
-          return
+          for (i <- 0 until matrix.length) {
+            d3selection.select("#ribbonID" + d.index + i)
+              .style("opacity", "1.0")
+            var f = d3selection.select("#ribbonID" + i + d.index)
+              .style("opacity", "1.0")
+          }
+          infobox.style("visibility", "visible")
+            .style("top", (d3.event.y + 10) + "px")
+            .style("left", (d3.event.x + 10) + "px")
+            .html(groupTip(d))
+          if (false) {
+            return
+          }
         }
       })
       // When hovering out of a group, hide the group info and display other groups normally
       .on("mouseout", (d: ChordGroup) => {
-        /*d3selection.select("#ribbonID"+d.source.index+d.target.index)
-          .style("opacity", "1.0")*/
-        for(i <- 0 until matrix.length){
-          d3selection.select("#chordgroup"+i)
-            .style("opacity", "1.0")
-          for(j <- 0 until matrix.length) {
-            d3selection.select("#ribbonID" + j + i)
+        if(hoverable) {
+          for (i <- 0 until matrix.length) {
+            d3selection.select("#chordgroup" + i)
               .style("opacity", "1.0")
-            d3selection.select("#ribbonID" + i + j)
-              .style("opacity", "1.0")
+            for (j <- 0 until matrix.length) {
+              d3selection.select("#ribbonID" + j + i)
+                .style("opacity", "1.0")
+              d3selection.select("#ribbonID" + i + j)
+                .style("opacity", "1.0")
+            }
           }
-        }
-        infobox.style("visibility", "hidden")
-        /*d3selection.select("#groupLabel"+d.index)
-          .style("visibility", "hidden")*/
-        if(false){
-          return
+          infobox.style("visibility", "hidden")
+          if (false) {
+            return
+          }
         }
       })
 
@@ -506,33 +512,37 @@ class chordDiagram(matrix : js.Array[js.Array[Double]]) {
       .style("stroke", (d: Chord) => d3.rgb(color(d.target.index)).darker())
       // When hovering over a ribbon, hide the others and display the ribbon info
       .on("mouseover", (d: Chord) => {
-        for(i <- 0 until matrix.length; j <- 0 until matrix.length){
-          d3selection.select("#ribbonID"+j+i)
-            .style("opacity", "0.2")
-          d3selection.select("#ribbonID"+i+j)
-            .style("opacity", "0.2")
-        }
-        d3selection.select("#ribbonID"+d.source.index+d.target.index)
-          .style("opacity", "1.0")
-        infobox.style("visibility", "visible")
-          .style("top", (d3.event.y+10)+"px")
-          .style("left", (d3.event.x+10)+"px")
-          .html(chordTip(d))
-        if(false){
-          return
+        if(hoverable) {
+          for (i <- 0 until matrix.length; j <- 0 until matrix.length) {
+            d3selection.select("#ribbonID" + j + i)
+              .style("opacity", "0.2")
+            d3selection.select("#ribbonID" + i + j)
+              .style("opacity", "0.2")
+          }
+          d3selection.select("#ribbonID" + d.source.index + d.target.index)
+            .style("opacity", "1.0")
+          infobox.style("visibility", "visible")
+            .style("top", (d3.event.y + 10) + "px")
+            .style("left", (d3.event.x + 10) + "px")
+            .html(chordTip(d))
+          if (false) {
+            return
+          }
         }
       })
       // When hovering out of a ribbon, hide the ribbon info and display other ribbons normally
       .on("mouseout", (d: Chord) => {
-        for(i <- 0 until matrix.length; j <- 0 until matrix.length){
-          d3selection.select("#ribbonID"+j+i)
-            .style("opacity", "1.0")
-          d3selection.select("#ribbonID"+i+j)
-            .style("opacity", "1.0")
-        }
-        infobox.style("visibility", "hidden")
-        if(false){
-          return
+        if(hoverable) {
+          for (i <- 0 until matrix.length; j <- 0 until matrix.length) {
+            d3selection.select("#ribbonID" + j + i)
+              .style("opacity", "1.0")
+            d3selection.select("#ribbonID" + i + j)
+              .style("opacity", "1.0")
+          }
+          infobox.style("visibility", "hidden")
+          if (false) {
+            return
+          }
         }
       })
   }
